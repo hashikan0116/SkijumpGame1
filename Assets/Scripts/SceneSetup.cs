@@ -156,7 +156,7 @@ public class SceneSetup : MonoBehaviour
 
         // Rigidbody2D（飛行フェーズで使用）
         var rb = go.AddComponent<Rigidbody2D>();
-        rb.gravityScale          = 1.5f;
+        rb.gravityScale           = 1.5f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation          = RigidbodyInterpolation2D.Interpolate;
 
@@ -165,11 +165,27 @@ public class SceneSetup : MonoBehaviour
         col.size      = new Vector2(0.8f, 0.35f);
         col.direction = CapsuleDirection2D.Horizontal;
 
-        // ビジュアル（赤い矩形スプライト）
-        var sr         = go.AddComponent<SpriteRenderer>();
-        sr.sprite      = MakeRectSprite(0.8f, 0.35f);
-        sr.color       = new Color(0.9f, 0.15f, 0.15f);
-        sr.sortingOrder = 5;
+        // 3Dモデルを Resources から読み込んで子オブジェクトに追加
+        var modelPrefab = Resources.Load<GameObject>("DummyJumper");
+        if (modelPrefab != null)
+        {
+            var model = Instantiate(modelPrefab, go.transform);
+            model.transform.localPosition = Vector3.zero;
+            // モデルが横向き（右方向）を向くよう回転。
+            // 見た目がおかしい場合は Y 値を 90/-90/0/180 で試してください。
+            model.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            // スケール調整（大きさがおかしい場合は変更してください）
+            model.transform.localScale    = Vector3.one * 0.5f;
+        }
+        else
+        {
+            // モデルが見つからない場合は赤箱にフォールバック
+            Debug.LogWarning("[SceneSetup] DummyJumper が Resources フォルダに見つかりません。赤箱で代替します。");
+            var sr          = go.AddComponent<SpriteRenderer>();
+            sr.sprite       = MakeRectSprite(0.8f, 0.35f);
+            sr.color        = new Color(0.9f, 0.15f, 0.15f);
+            sr.sortingOrder = 5;
+        }
 
         // SkiJumper スクリプトをアタッチ
         go.AddComponent<SkiJumper>();
